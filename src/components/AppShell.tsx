@@ -4,6 +4,14 @@ import { flushQueue, getQueue } from "@/lib/api";
 import { Wifi, WifiOff, CloudUpload } from "lucide-react";
 import { cn } from "@/lib/utils";
 import logoAsset from "@/assets/mchanga-afya-icon.png.asset.json";
+import bannerAsset from "@/assets/mchanga-afya-logo.png.asset.json";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+} from "@/components/ui/carousel";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
@@ -86,6 +94,47 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </ul>
         </nav>
       </header>
+      <section className="mx-auto w-full max-w-6xl px-4 py-4">
+        <Carousel className="relative overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
+          <CarouselContent className="flex">
+            <CarouselItem>
+              <div className="relative overflow-hidden rounded-3xl">
+                <img
+                  src={bannerAsset.url}
+                  alt="Mchanga Afya banner"
+                  className="h-52 w-full object-cover sm:h-64"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-slate-950/60 via-slate-950/10 to-slate-950/0" />
+                <div className="absolute inset-x-0 bottom-4 px-4 sm:px-6">
+                  <div className="rounded-2xl bg-background/80 p-4 shadow-lg shadow-slate-950/10 backdrop-blur">
+                    <h2 className="text-lg font-display font-bold text-slate-950">Mchanga Afya</h2>
+                    <p className="text-sm text-slate-600 sm:text-base">
+                      Field-ready crop, soil, and fertilizer intelligence — now with a fresh brand banner on every page.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CarouselItem>
+            <CarouselItem>
+              <div className="relative overflow-hidden rounded-3xl bg-primary/5">
+                <div className="flex h-52 w-full items-center justify-center px-6 sm:h-64">
+                  <div className="grid gap-3 text-center">
+                    <img src={logoAsset.url} alt="Mchanga Afya icon" className="mx-auto h-16 w-16 rounded-2xl bg-white/90 p-3 shadow" />
+                    <div>
+                      <p className="text-sm font-medium uppercase tracking-[0.24em] text-primary">Mchanga Afya</p>
+                      <p className="text-base text-slate-700 sm:text-lg">
+                        Simple data capture for farmers, farms, and soil health.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CarouselItem>
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
+      </section>
       <main className="flex-1 mx-auto w-full max-w-6xl px-4 py-6">{children}</main>
       <footer className="border-t border-border py-4 text-center text-xs text-muted-foreground">
         Mchanga Afya · Soil → Crop → Fertilizer → Yield
