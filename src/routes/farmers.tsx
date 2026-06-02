@@ -4,7 +4,8 @@ import { toast } from "sonner";
 import { Users, Trash2, Edit2 } from "lucide-react";
 
 import { PageHeader } from "@/components/FormSection";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   Table,
   TableBody,
@@ -57,9 +58,12 @@ function FarmersList() {
     <div className="max-w-6xl">
       <div className="flex items-center justify-between mb-5">
         <PageHeader icon={Users} title="Farmers" subtitle="Registered field agents and farm operators." />
-        <Button asChild>
-          <Link to="/farmers/new">Add Farmer</Link>
-        </Button>
+        <Link
+          to="/farmers/new"
+          className={cn(buttonVariants({ variant: "default", size: "default" }))}
+        >
+          Add Farmer
+        </Link>
       </div>
 
       {loading ? (
@@ -73,9 +77,12 @@ function FarmersList() {
       ) : farmers.length === 0 ? (
         <div className="rounded-lg border border-border bg-card p-8 text-center">
           <p className="text-sm text-muted-foreground mb-4">No farmers registered yet.</p>
-          <Button asChild>
-            <Link to="/farmers/new">Register First Farmer</Link>
-          </Button>
+          <Link
+            to="/farmers/new"
+            className={cn(buttonVariants({ variant: "default", size: "default" }))}
+          >
+            Register First Farmer
+          </Link>
         </div>
       ) : (
         <div className="rounded-lg border border-border bg-card overflow-hidden">

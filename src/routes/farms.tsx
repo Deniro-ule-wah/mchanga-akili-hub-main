@@ -4,7 +4,8 @@ import { toast } from "sonner";
 import { Sprout } from "lucide-react";
 
 import { PageHeader } from "@/components/FormSection";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   Table,
   TableBody,
@@ -46,9 +47,12 @@ function FarmsList() {
     <div className="max-w-6xl">
       <div className="flex items-center justify-between mb-5">
         <PageHeader icon={Sprout} title="Farms" subtitle="Land parcels registered for each farmer." />
-        <Button asChild>
-          <Link to="/farms/new">Add Farm</Link>
-        </Button>
+        <Link
+          to="/farms/new"
+          className={cn(buttonVariants({ variant: "default", size: "default" }))}
+        >
+          Add Farm
+        </Link>
       </div>
 
       {loading ? (
@@ -62,9 +66,12 @@ function FarmsList() {
       ) : farms.length === 0 ? (
         <div className="rounded-lg border border-border bg-card p-8 text-center">
           <p className="text-sm text-muted-foreground mb-4">No farms registered yet.</p>
-          <Button asChild>
-            <Link to="/farms/new">Register First Farm</Link>
-          </Button>
+          <Link
+            to="/farms/new"
+            className={cn(buttonVariants({ variant: "default", size: "default" }))}
+          >
+            Register First Farm
+          </Link>
         </div>
       ) : (
         <div className="rounded-lg border border-border bg-card overflow-hidden">
