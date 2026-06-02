@@ -21,6 +21,7 @@ export const Route = createFileRoute("/")({
 const actions = [
   { to: "/farmers", label: "View Farmers", icon: Users, hint: "Browse all farmers" },
   { to: "/farmers/new", label: "Add Farmer", icon: UserPlus, hint: "Register a new farmer" },
+  { to: "/farms", label: "View Farms", icon: Sprout, hint: "Browse registered farms" },
   { to: "/farms/new", label: "Add Farm", icon: Sprout, hint: "Link a farm to a farmer" },
   { to: "/soil-tests/new", label: "Soil Test", icon: FlaskConical, hint: "pH, NPK, texture" },
   { to: "/crop-cycles/new", label: "Crop Cycle", icon: Wheat, hint: "Planting & variety" },

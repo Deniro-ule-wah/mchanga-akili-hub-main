@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as FarmsRouteImport } from './routes/farms'
 import { Route as FarmersRouteImport } from './routes/farmers'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as YieldNewRouteImport } from './routes/yield.new'
@@ -19,6 +20,11 @@ import { Route as FarmersNewRouteImport } from './routes/farmers.new'
 import { Route as CropCyclesNewRouteImport } from './routes/crop-cycles.new'
 import { Route as FarmersFarmer_idEditRouteImport } from './routes/farmers.$farmer_id.edit'
 
+const FarmsRoute = FarmsRouteImport.update({
+  id: '/farms',
+  path: '/farms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FarmersRoute = FarmersRouteImport.update({
   id: '/farmers',
   path: '/farmers',
@@ -45,9 +51,9 @@ const FertilizerNewRoute = FertilizerNewRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const FarmsNewRoute = FarmsNewRouteImport.update({
-  id: '/farms/new',
-  path: '/farms/new',
-  getParentRoute: () => rootRouteImport,
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => FarmsRoute,
 } as any)
 const FarmersNewRoute = FarmersNewRouteImport.update({
   id: '/new',
@@ -68,6 +74,7 @@ const FarmersFarmer_idEditRoute = FarmersFarmer_idEditRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/farmers': typeof FarmersRouteWithChildren
+  '/farms': typeof FarmsRouteWithChildren
   '/crop-cycles/new': typeof CropCyclesNewRoute
   '/farmers/new': typeof FarmersNewRoute
   '/farms/new': typeof FarmsNewRoute
@@ -79,6 +86,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/farmers': typeof FarmersRouteWithChildren
+  '/farms': typeof FarmsRouteWithChildren
   '/crop-cycles/new': typeof CropCyclesNewRoute
   '/farmers/new': typeof FarmersNewRoute
   '/farms/new': typeof FarmsNewRoute
@@ -91,6 +99,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/farmers': typeof FarmersRouteWithChildren
+  '/farms': typeof FarmsRouteWithChildren
   '/crop-cycles/new': typeof CropCyclesNewRoute
   '/farmers/new': typeof FarmersNewRoute
   '/farms/new': typeof FarmsNewRoute
@@ -104,6 +113,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/farmers'
+    | '/farms'
     | '/crop-cycles/new'
     | '/farmers/new'
     | '/farms/new'
@@ -115,6 +125,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/farmers'
+    | '/farms'
     | '/crop-cycles/new'
     | '/farmers/new'
     | '/farms/new'
@@ -126,6 +137,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/farmers'
+    | '/farms'
     | '/crop-cycles/new'
     | '/farmers/new'
     | '/farms/new'
@@ -138,8 +150,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   FarmersRoute: typeof FarmersRouteWithChildren
+  FarmsRoute: typeof FarmsRouteWithChildren
   CropCyclesNewRoute: typeof CropCyclesNewRoute
-  FarmsNewRoute: typeof FarmsNewRoute
   FertilizerNewRoute: typeof FertilizerNewRoute
   SoilTestsNewRoute: typeof SoilTestsNewRoute
   YieldNewRoute: typeof YieldNewRoute
@@ -147,6 +159,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/farms': {
+      id: '/farms'
+      path: '/farms'
+      fullPath: '/farms'
+      preLoaderRoute: typeof FarmsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/farmers': {
       id: '/farmers'
       path: '/farmers'
@@ -184,10 +203,10 @@ declare module '@tanstack/react-router' {
     }
     '/farms/new': {
       id: '/farms/new'
-      path: '/farms/new'
+      path: '/new'
       fullPath: '/farms/new'
       preLoaderRoute: typeof FarmsNewRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof FarmsRoute
     }
     '/farmers/new': {
       id: '/farmers/new'
@@ -226,11 +245,21 @@ const FarmersRouteChildren: FarmersRouteChildren = {
 const FarmersRouteWithChildren =
   FarmersRoute._addFileChildren(FarmersRouteChildren)
 
+interface FarmsRouteChildren {
+  FarmsNewRoute: typeof FarmsNewRoute
+}
+
+const FarmsRouteChildren: FarmsRouteChildren = {
+  FarmsNewRoute: FarmsNewRoute,
+}
+
+const FarmsRouteWithChildren = FarmsRoute._addFileChildren(FarmsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   FarmersRoute: FarmersRouteWithChildren,
+  FarmsRoute: FarmsRouteWithChildren,
   CropCyclesNewRoute: CropCyclesNewRoute,
-  FarmsNewRoute: FarmsNewRoute,
   FertilizerNewRoute: FertilizerNewRoute,
   SoilTestsNewRoute: SoilTestsNewRoute,
   YieldNewRoute: YieldNewRoute,

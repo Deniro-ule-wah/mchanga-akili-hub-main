@@ -57,9 +57,9 @@ function FarmersList() {
     <div className="max-w-6xl">
       <div className="flex items-center justify-between mb-5">
         <PageHeader icon={Users} title="Farmers" subtitle="Registered field agents and farm operators." />
-        <Link to="/farmers/new">
-          <Button>Add Farmer</Button>
-        </Link>
+        <Button asChild>
+          <Link to="/farmers/new">Add Farmer</Link>
+        </Button>
       </div>
 
       {loading ? (
@@ -73,9 +73,9 @@ function FarmersList() {
       ) : farmers.length === 0 ? (
         <div className="rounded-lg border border-border bg-card p-8 text-center">
           <p className="text-sm text-muted-foreground mb-4">No farmers registered yet.</p>
-          <Link to="/farmers/new">
-            <Button>Register First Farmer</Button>
-          </Link>
+          <Button asChild>
+            <Link to="/farmers/new">Register First Farmer</Link>
+          </Button>
         </div>
       ) : (
         <div className="rounded-lg border border-border bg-card overflow-hidden">

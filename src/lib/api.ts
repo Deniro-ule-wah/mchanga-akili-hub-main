@@ -165,6 +165,19 @@ export const api = {
     }
   },
 
+  getFarms: async () => {
+    if (!BASE_URL) return { ok: false, data: [] };
+    try {
+      const res = await fetch(`${BASE_URL}/farms`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      return { ok: true, data: json.data || [] };
+    } catch (error) {
+      console.error('getFarms error:', error);
+      return { ok: false, data: [] };
+    }
+  },
+
   getFarmerById: async (id: string | number) => {
     if (!BASE_URL) return { ok: false, data: null };
     try {
