@@ -4,11 +4,20 @@ const handleError = (res, message, status = 400) => res.status(status).json({ su
 
 export async function getAllFarmers(req, res) {
   try {
-    const result = await pool.query('SELECT * FROM farmers ORDER BY id');
-    return res.json({ success: true, data: result.rows });
+    const result = await pool.query('SELECT * FROM farmers');
+    console.log(result.rows);
+
+    return res.json({
+      success: true,
+      data: result.rows
+    });
+
   } catch (error) {
-    console.error(error);
-    return handleError(res, 'Unable to load farmers', 500);
+    console.error("DB ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
   }
 }
 
