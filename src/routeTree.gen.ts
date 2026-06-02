@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as FarmsRouteImport } from './routes/farms'
 import { Route as FarmersRouteImport } from './routes/farmers'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as YieldNewRouteImport } from './routes/yield.new'
 import { Route as SoilTestsNewRouteImport } from './routes/soil-tests.new'
@@ -28,6 +29,11 @@ const FarmsRoute = FarmsRouteImport.update({
 const FarmersRoute = FarmersRouteImport.update({
   id: '/farmers',
   path: '/farmers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -73,6 +79,7 @@ const FarmersFarmer_idEditRoute = FarmersFarmer_idEditRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/farmers': typeof FarmersRouteWithChildren
   '/farms': typeof FarmsRouteWithChildren
   '/crop-cycles/new': typeof CropCyclesNewRoute
@@ -85,6 +92,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/farmers': typeof FarmersRouteWithChildren
   '/farms': typeof FarmsRouteWithChildren
   '/crop-cycles/new': typeof CropCyclesNewRoute
@@ -98,6 +106,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/farmers': typeof FarmersRouteWithChildren
   '/farms': typeof FarmsRouteWithChildren
   '/crop-cycles/new': typeof CropCyclesNewRoute
@@ -112,6 +121,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/farmers'
     | '/farms'
     | '/crop-cycles/new'
@@ -124,6 +134,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/farmers'
     | '/farms'
     | '/crop-cycles/new'
@@ -136,6 +147,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/farmers'
     | '/farms'
     | '/crop-cycles/new'
@@ -149,6 +161,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   FarmersRoute: typeof FarmersRouteWithChildren
   FarmsRoute: typeof FarmsRouteWithChildren
   CropCyclesNewRoute: typeof CropCyclesNewRoute
@@ -171,6 +184,13 @@ declare module '@tanstack/react-router' {
       path: '/farmers'
       fullPath: '/farmers'
       preLoaderRoute: typeof FarmersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -257,6 +277,7 @@ const FarmsRouteWithChildren = FarmsRoute._addFileChildren(FarmsRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   FarmersRoute: FarmersRouteWithChildren,
   FarmsRoute: FarmsRouteWithChildren,
   CropCyclesNewRoute: CropCyclesNewRoute,

@@ -52,6 +52,7 @@ export async function createFarmer(req, res) {
     county,
     sub_county,
     village
+    , status
   } = req.body;
 
   if (!full_name || !phone) {
@@ -61,8 +62,8 @@ export async function createFarmer(req, res) {
   try {
     const query = `
       INSERT INTO farmers
-      (full_name, phone, email, county, sub_county, village)
-      VALUES ($1, $2, $3, $4, $5, $6)
+      (full_name, phone, email, county, sub_county, village, status)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *
     `;
 
@@ -72,7 +73,8 @@ export async function createFarmer(req, res) {
       email || null,
       county || null,
       sub_county || null,
-      village || null
+      village || null,
+      status || 'pending'
     ]);
 
     return res.status(201).json({
@@ -95,6 +97,7 @@ export async function updateFarmer(req, res) {
     county,
     sub_county,
     village
+    , status
   } = req.body;
 
   const fields = [];
@@ -128,6 +131,11 @@ export async function updateFarmer(req, res) {
   if (village !== undefined) {
     values.push(village);
     fields.push(`village = $${values.length}`);
+  }
+
+  if (status !== undefined) {
+    values.push(status);
+    fields.push(`status = $${values.length}`);
   }
 
   if (!fields.length) {

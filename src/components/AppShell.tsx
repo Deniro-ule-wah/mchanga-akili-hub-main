@@ -1,18 +1,22 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { flushQueue, getQueue } from "@/lib/api";
+import { isAdminAuthenticated, logoutAdmin } from "@/lib/auth";
 import { Wifi, WifiOff, CloudUpload } from "lucide-react";
 import { cn } from "@/lib/utils";
 import logoAsset from "@/assets/mchanga-afya-icon.png.asset.json";
+import { Button, buttonVariants } from "@/components/ui/button";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const [online, setOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
   const [queueCount, setQueueCount] = useState(0);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const refresh = () => setQueueCount(getQueue().length);
     refresh();
+    setIsAdmin(isAdminAuthenticated());
     const onOnline = () => { setOnline(true); flushQueue().then(refresh); };
     const onOffline = () => setOnline(false);
     window.addEventListener("online", onOnline);
@@ -61,6 +65,24 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 {queueCount} queued
               </span>
             )}
+            <span className="ml-2">
+              {isAdmin ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    logoutAdmin();
+                    window.location.href = "/admin";
+                  }}
+                >
+                  Sign out
+                </Button>
+              ) : (
+                <Link to="/admin" className={buttonVariants({ variant: "outline", size: "sm" })}>
+                  Admin sign in
+                </Link>
+              )}
+            </span>
           </div>
         </div>
         <nav className="mx-auto max-w-6xl px-2 overflow-x-auto">

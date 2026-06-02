@@ -37,6 +37,7 @@ async function createTables() {
       county TEXT,
       sub_county TEXT,
       village TEXT,
+      status TEXT DEFAULT 'pending',
       created_at TIMESTAMPTZ DEFAULT NOW()
     );
 

@@ -2,6 +2,8 @@
 // Configure VITE_API_BASE_URL in your environment to point at your existing PostgreSQL-backed REST API.
 // Falls back to an offline queue stored in localStorage when the network is unavailable.
 
+import { isAdminAuthenticated } from "@/lib/auth";
+
 const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "") || "";
 
 export interface GPS {
@@ -18,6 +20,7 @@ export interface Farmer {
   village: string;
   email?: string | null;
   sub_county?: string | null;
+  status?: "pending" | "confirmed";
   national_id?: string;
   gps?: GPS;
 }
@@ -230,6 +233,33 @@ export const api = {
       enqueue(`/farmers/${id}`, "DELETE", null);
       return { ok: true, queued: true };
     }
+  },
+
+  confirmFarmer: async (id: string | number) => {
+    if (!isAdminAuthenticated()) {
+      return { ok: false, queued: false };
+    }
+    if (!BASE_URL || !navigator.onLine) {
+      enqueue(`/farmers/${id}`, "PUT", { status: "confirmed" });
+      return { ok: true, queued: true };
+    }
+    try {
+      const res = await fetch(`${BASE_URL}/farmers/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "confirmed" }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return { ok: true, queued: false };
+    } catch (error) {
+      console.error('confirmFarmer error:', error);
+      enqueue(`/farmers/${id}`, "PUT", { status: "confirmed" });
+      return { ok: true, queued: true };
+    }
+  },
+
+  rejectFarmer: async (id: string | number) => {
+    return api.deleteFarmer(id);
   },
 
   createFarm: (f: Farm) => post("/farms", f),

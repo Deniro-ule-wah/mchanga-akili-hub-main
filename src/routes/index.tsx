@@ -1,10 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { PageHeader } from "@/components/FormSection";
 import {
   UserPlus, Sprout, FlaskConical, Wheat, Beaker, BarChart3, LayoutDashboard, Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getQueue, flushQueue, api } from "@/lib/api";
+import { isAdminAuthenticated } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import logoAsset from "@/assets/mchanga-afya-icon.png.asset.json";
 
@@ -37,6 +38,7 @@ function Dashboard() {
   const [queue, setQueue] = useState(getQueue());
   const [farmerCount, setFarmerCount] = useState(0);
   const [farmCount, setFarmCount] = useState(0);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const t = setInterval(() => setQueue(getQueue()), 2000);
@@ -56,6 +58,12 @@ function Dashboard() {
     };
     loadCounts();
   }, []);
+
+  useEffect(() => {
+    if (!isAdminAuthenticated()) {
+      navigate({ to: "/admin", replace: true });
+    }
+  }, [navigate]);
 
   return (
     <div>

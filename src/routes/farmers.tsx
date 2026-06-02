@@ -1,11 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Users, Trash2, Edit2 } from "lucide-react";
+import { Users, Trash2, Edit2, CheckCircle2 } from "lucide-react";
 
 import { PageHeader } from "@/components/FormSection";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { confirmFarmer, rejectFarmer } from "@/api/farmers";
+import { isAdminAuthenticated } from "@/lib/auth";
 import {
   Table,
   TableBody,
@@ -43,6 +46,33 @@ function FarmersList() {
     setLoading(false);
   };
 
+  const isAdmin = isAdminAuthenticated();
+
+  const handleConfirm = async (farmer_id: string | number) => {
+    const result = await confirmFarmer(farmer_id);
+    if (result.ok) {
+      toast.success(result.queued ? "Confirmed offline" : "Farmer confirmed");
+      setFarmers((current) =>
+        current.map((farmer) =>
+          farmer.farmer_id === farmer_id ? { ...farmer, status: "confirmed" } : farmer,
+        ),
+      );
+    } else {
+      toast.error("Unable to confirm farmer");
+    }
+  };
+
+  const handleReject = async (farmer_id: string | number) => {
+    if (!confirm("Reject this entry and delete the farmer?")) return;
+    const result = await rejectFarmer(farmer_id);
+    if (result.ok) {
+      toast.success(result.queued ? "Rejected offline" : "Farmer rejected");
+      setFarmers((current) => current.filter((farmer) => farmer.farmer_id !== farmer_id));
+    } else {
+      toast.error("Unable to reject farmer");
+    }
+  };
+
   const handleDelete = async (farmer_id: string | number) => {
     if (!confirm("Are you sure you want to delete this farmer?")) return;
     const result = await api.deleteFarmer(farmer_id);
@@ -65,6 +95,15 @@ function FarmersList() {
           Add Farmer
         </Link>
       </div>
+
+        {!isAdmin && (
+          <div className="rounded-lg border border-border bg-secondary/10 p-4 mb-5 text-sm text-secondary-foreground">
+            Admin login is required to confirm or reject farmers. 
+            <Link to="/admin" className="font-semibold underline">
+              Sign in as admin
+            </Link>
+          </div>
+        )}
 
       {loading ? (
         <div className="text-center py-8">
@@ -93,6 +132,7 @@ function FarmersList() {
                 <TableHead>Phone</TableHead>
                 <TableHead>County</TableHead>
                 <TableHead>Village</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -104,8 +144,33 @@ function FarmersList() {
                   <TableCell>{farmer.phone}</TableCell>
                   <TableCell>{farmer.county || "—"}</TableCell>
                   <TableCell>{farmer.village || "—"}</TableCell>
+                  <TableCell>
+                    <Badge variant={farmer.status === "confirmed" ? "default" : "secondary"}>
+                      {farmer.status === "confirmed" ? "Confirmed" : "Pending"}
+                    </Badge>
+                  </TableCell>
                   <TableCell>{farmer.email || "—"}</TableCell>
                   <TableCell className="text-right space-x-2">
+                    {isAdmin && farmer.status !== "confirmed" && (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-success hover:text-success"
+                          onClick={() => handleConfirm(farmer.farmer_id)}
+                        >
+                          <CheckCircle2 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => handleReject(farmer.farmer_id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
                     <Link to={`/farmers/${farmer.farmer_id}/edit`}>
                       <Button variant="ghost" size="sm">
                         <Edit2 className="h-4 w-4" />
