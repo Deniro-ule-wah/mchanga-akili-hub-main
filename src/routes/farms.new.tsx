@@ -48,7 +48,7 @@ function NewFarm() {
     const res = await api.createFarm({ ...parsed.data, gps });
     setSubmitting(false);
     toast.success(res.queued ? "Saved offline — will sync" : "Farm registered");
-    navigate({ to: "/" });
+    navigate({ to: "/farms" });
   };
 
   return (

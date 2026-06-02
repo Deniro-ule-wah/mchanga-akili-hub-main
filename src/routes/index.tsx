@@ -36,6 +36,7 @@ function LogoIcon({ className }: { className?: string }) {
 function Dashboard() {
   const [queue, setQueue] = useState(getQueue());
   const [farmerCount, setFarmerCount] = useState(0);
+  const [farmCount, setFarmCount] = useState(0);
 
   useEffect(() => {
     const t = setInterval(() => setQueue(getQueue()), 2000);
@@ -43,13 +44,17 @@ function Dashboard() {
   }, []);
 
   useEffect(() => {
-    const loadFarmerCount = async () => {
-      const result = await api.getFarmers();
-      if (result.ok) {
-        setFarmerCount(result.data.length);
+    const loadCounts = async () => {
+      const farmersResult = await api.getFarmers();
+      if (farmersResult.ok) {
+        setFarmerCount(farmersResult.data.length);
+      }
+      const farmsResult = await api.getFarms();
+      if (farmsResult.ok) {
+        setFarmCount(farmsResult.data.length);
       }
     };
-    loadFarmerCount();
+    loadCounts();
   }, []);
 
   return (
@@ -83,6 +88,10 @@ function Dashboard() {
         <Link to="/farmers" className="group rounded-xl border border-border bg-card p-4 shadow-sm hover:border-primary hover:shadow-md transition-all">
           <div className="text-2xl font-display font-semibold text-primary">{farmerCount}</div>
           <div className="text-xs text-muted-foreground mt-1">Farmers Registered</div>
+        </Link>
+        <Link to="/farms" className="group rounded-xl border border-border bg-card p-4 shadow-sm hover:border-primary hover:shadow-md transition-all">
+          <div className="text-2xl font-display font-semibold text-primary">{farmCount}</div>
+          <div className="text-xs text-muted-foreground mt-1">Farms Registered</div>
         </Link>
       </div>
 

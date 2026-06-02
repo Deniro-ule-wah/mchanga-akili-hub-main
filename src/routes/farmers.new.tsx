@@ -50,7 +50,7 @@ function NewFarmer() {
     const res = await api.createFarmer({ ...parsed.data, gps });
     setSubmitting(false);
     toast.success(res.queued ? "Saved offline — will sync" : "Farmer registered");
-    navigate({ to: "/" });
+    navigate({ to: "/farmers" });
   };
 
   return (
