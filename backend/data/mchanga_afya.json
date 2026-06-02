@@ -1,0 +1,77 @@
+{
+  "farmers": [
+    {
+      "id": 1,
+      "name": "Jane A. Farmer",
+      "email": "jane.farmer@example.com",
+      "phone": "+254700000001",
+      "region": "Nakuru",
+      "created_at": "2026-01-15T08:30:00Z"
+    }
+  ],
+  "farms": [
+    {
+      "id": 1,
+      "name": "Green Valley Farm",
+      "farmer_id": 1,
+      "location": "Nakuru County",
+      "size": 3.5,
+      "soil_type": "Loam",
+      "created_at": "2026-01-16T08:30:00Z"
+    }
+  ],
+  "soil_tests": [
+    {
+      "id": 1,
+      "farm_id": 1,
+      "ph": 6.8,
+      "nitrogen": 24,
+      "phosphorus": 12,
+      "potassium": 15,
+      "organic_matter": 4.3,
+      "test_date": "2026-02-01",
+      "notes": "Balanced soil conditions"
+    }
+  ],
+  "crop_cycles": [
+    {
+      "id": 1,
+      "farm_id": 1,
+      "crop_name": "Maize",
+      "season": "Long rains",
+      "start_date": "2026-02-15",
+      "end_date": "2026-06-15",
+      "status": "planted"
+    }
+  ],
+  "fertilizer_applications": [
+    {
+      "id": 1,
+      "crop_cycle_id": 1,
+      "fertilizer_type": "DAP",
+      "quantity": 75,
+      "application_date": "2026-03-01",
+      "notes": "First application"
+    }
+  ],
+  "yield_outcomes": [
+    {
+      "id": 1,
+      "crop_cycle_id": 1,
+      "yield_amount": 1800,
+      "unit": "kg",
+      "harvest_date": "2026-06-20",
+      "notes": "Good yield with balanced nutrients"
+    }
+  ],
+  "recommendations": [
+    {
+      "id": 1,
+      "farmer_id": 1,
+      "farm_id": 1,
+      "crop_cycle_id": 1,
+      "recommendation_text": "Increase organic matter by adding compost before the next planting season.",
+      "created_at": "2026-06-25T09:30:00Z"
+    }
+  ]
+}
