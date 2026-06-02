@@ -53,6 +53,25 @@ function Dashboard() {
 
   return (
     <div>
+      <div className="mb-6 flex flex-col gap-4 rounded-3xl border border-border bg-card p-6 shadow-sm md:flex-row md:items-center md:justify-between">
+        <div className="flex items-center gap-4">
+          <img
+            src={logoAsset.url}
+            alt="Mchanga Afya logo"
+            className="h-16 w-16 rounded-3xl bg-primary/10 p-3 object-contain"
+          />
+          <div>
+            <h1 className="text-3xl font-display font-bold tracking-tight">Mchanga Afya</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Mobile-first capture for the full soil → crop → fertilizer → yield lifecycle.
+            </p>
+          </div>
+        </div>
+        <div className="rounded-xl bg-primary/5 px-4 py-2 text-sm font-semibold text-primary">
+          Dashboard logo updated
+        </div>
+      </div>
+
       <PageHeader
         icon={LogoIcon}
         title="Field Agent"
