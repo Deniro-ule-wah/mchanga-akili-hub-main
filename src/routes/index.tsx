@@ -6,6 +6,7 @@ import {
 import { useEffect, useState } from "react";
 import { getQueue, flushQueue, api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
+import logoAsset from "@/assets/mchanga-afya-icon.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -26,6 +27,10 @@ const actions = [
   { to: "/fertilizer/new", label: "Fertilizer", icon: Beaker, hint: "Application log" },
   { to: "/yield/new", label: "Yield", icon: BarChart3, hint: "Harvest outcome" },
 ];
+
+function LogoIcon({ className }: { className?: string }) {
+  return <img src={logoAsset.url} alt="Mchanga Afya logo" className={className} />;
+}
 
 function Dashboard() {
   const [queue, setQueue] = useState(getQueue());
@@ -49,7 +54,7 @@ function Dashboard() {
   return (
     <div>
       <PageHeader
-        icon={LayoutDashboard}
+        icon={LogoIcon}
         title="Field Agent"
         subtitle="Mobile-first capture for the full soil → crop → fertilizer → yield lifecycle."
       />
