@@ -93,7 +93,6 @@ function NewFarmer() {
           <div>
             <Label htmlFor="village">Village *</Label>
             <Input id="village" value={form.village} onChange={(e) => setForm({ ...form, village: e.target.value })} />
-            </div>
           </div>
           <GpsCapture value={gps} onChange={setGps} />
         </FormSection>
