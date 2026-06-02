@@ -1,18 +1,17 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, useNavigate, useParams } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
-import { UserPlus } from "lucide-react";
+import { Edit2 } from "lucide-react";
 
 import { PageHeader, FormSection } from "@/components/FormSection";
-import { GpsCapture } from "@/components/GpsCapture";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { api, type GPS } from "@/lib/api";
+import { api, type Farmer } from "@/lib/api";
 import { COUNTIES } from "@/lib/options";
 
 const schema = z.object({
@@ -24,16 +23,38 @@ const schema = z.object({
   sub_county: z.string().trim().optional().or(z.literal("")),
 });
 
-export const Route = createFileRoute("/farmers/new")({
-  head: () => ({ meta: [{ title: "Add Farmer — Mchanga Afya" }] }),
-  component: NewFarmer,
+export const Route = createFileRoute("/farmers/$farmer_id/edit")({
+  head: () => ({ meta: [{ title: "Edit Farmer — Mchanga Afya" }] }),
+  component: EditFarmer,
 });
 
-function NewFarmer() {
+function EditFarmer() {
+  const { farmer_id } = useParams({ from: "/farmers/$farmer_id/edit" });
   const navigate = useNavigate();
   const [form, setForm] = useState({ full_name: "", phone: "", email: "", county: "", village: "", sub_county: "" });
-  const [gps, setGps] = useState<GPS | undefined>();
   const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadFarmer = async () => {
+      const result = await api.getFarmerById(farmer_id);
+      if (result.ok && result.data) {
+        setForm({
+          full_name: result.data.full_name,
+          phone: result.data.phone,
+          email: result.data.email || "",
+          county: result.data.county || "",
+          village: result.data.village || "",
+          sub_county: result.data.sub_county || "",
+        });
+      } else {
+        toast.error("Failed to load farmer details");
+        navigate({ to: "/farmers" });
+      }
+      setLoading(false);
+    };
+    loadFarmer();
+  }, [farmer_id, navigate]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,20 +63,20 @@ function NewFarmer() {
       toast.error(parsed.error.issues[0].message);
       return;
     }
-    if (!gps || !Number.isFinite(gps.latitude) || !Number.isFinite(gps.longitude)) {
-      toast.error("GPS location is required");
-      return;
-    }
     setSubmitting(true);
-    const res = await api.createFarmer({ ...parsed.data, gps });
+    const res = await api.updateFarmer(farmer_id, parsed.data);
     setSubmitting(false);
-    toast.success(res.queued ? "Saved offline — will sync" : "Farmer registered");
-    navigate({ to: "/" });
+    toast.success(res.queued ? "Saved offline — will sync" : "Farmer updated");
+    navigate({ to: "/farmers" });
   };
+
+  if (loading) {
+    return <div className="max-w-2xl"><PageHeader icon={Edit2} title="Edit Farmer" subtitle="Update farmer information." /></div>;
+  }
 
   return (
     <div className="max-w-2xl">
-      <PageHeader icon={UserPlus} title="Register Farmer" subtitle="Capture identity and primary location." />
+      <PageHeader icon={Edit2} title="Edit Farmer" subtitle="Update farmer information." />
       <form onSubmit={submit} className="space-y-5">
         <FormSection title="Identity">
           <div>
@@ -93,14 +114,12 @@ function NewFarmer() {
           <div>
             <Label htmlFor="village">Village *</Label>
             <Input id="village" value={form.village} onChange={(e) => setForm({ ...form, village: e.target.value })} />
-            </div>
           </div>
-          <GpsCapture value={gps} onChange={setGps} />
         </FormSection>
 
         <div className="flex gap-2">
-          <Button type="submit" disabled={submitting}>{submitting ? "Saving…" : "Register Farmer"}</Button>
-          <Button type="button" variant="outline" onClick={() => navigate({ to: "/" })}>Cancel</Button>
+          <Button type="submit" disabled={submitting}>{submitting ? "Saving…" : "Update Farmer"}</Button>
+          <Button type="button" variant="outline" onClick={() => navigate({ to: "/farmers" })}>Cancel</Button>
         </div>
       </form>
     </div>

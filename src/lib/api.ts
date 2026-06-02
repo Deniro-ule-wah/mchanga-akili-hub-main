@@ -11,11 +11,13 @@ export interface GPS {
 }
 
 export interface Farmer {
-  id?: string;
-  name: string;
+  farmer_id?: string | number;
+  full_name: string;
   phone: string;
   county: string;
   village: string;
+  email?: string | null;
+  sub_county?: string | null;
   national_id?: string;
   gps?: GPS;
 }
@@ -149,7 +151,74 @@ async function post<T>(path: string, body: T): Promise<{ ok: true; queued: boole
 }
 
 export const api = {
+  // Farmers
+  getFarmers: async () => {
+    if (!BASE_URL) return { ok: false, data: [] };
+    try {
+      const res = await fetch(`${BASE_URL}/farmers`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      return { ok: true, data: json.data || [] };
+    } catch (error) {
+      console.error('getFarmers error:', error);
+      return { ok: false, data: [] };
+    }
+  },
+
+  getFarmerById: async (id: string | number) => {
+    if (!BASE_URL) return { ok: false, data: null };
+    try {
+      const res = await fetch(`${BASE_URL}/farmers/${id}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      return { ok: true, data: json.data || null };
+    } catch (error) {
+      console.error('getFarmerById error:', error);
+      return { ok: false, data: null };
+    }
+  },
+
   createFarmer: (f: Farmer) => post("/farmers", f),
+
+  updateFarmer: async (id: string | number, updates: Partial<Farmer>) => {
+    if (!BASE_URL || !navigator.onLine) {
+      enqueue(`/farmers/${id}`, "PUT", updates);
+      return { ok: true, queued: true };
+    }
+    try {
+      const res = await fetch(`${BASE_URL}/farmers/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return { ok: true, queued: false };
+    } catch (error) {
+      console.error('updateFarmer error:', error);
+      enqueue(`/farmers/${id}`, "PUT", updates);
+      return { ok: true, queued: true };
+    }
+  },
+
+  deleteFarmer: async (id: string | number) => {
+    if (!BASE_URL || !navigator.onLine) {
+      enqueue(`/farmers/${id}`, "DELETE", null);
+      return { ok: true, queued: true };
+    }
+    try {
+      const res = await fetch(`${BASE_URL}/farmers/${id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return { ok: true, queued: false };
+    } catch (error) {
+      console.error('deleteFarmer error:', error);
+      enqueue(`/farmers/${id}`, "DELETE", null);
+      return { ok: true, queued: true };
+    }
+  },
+
   createFarm: (f: Farm) => post("/farms", f),
   createSoilTest: (s: SoilTest) => post("/soil-tests", s),
   createCropCycle: (c: CropCycle) => post("/crop-cycles", c),

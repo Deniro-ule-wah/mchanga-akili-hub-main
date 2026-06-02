@@ -1,10 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageHeader } from "@/components/FormSection";
 import {
-  UserPlus, Sprout, FlaskConical, Wheat, Beaker, BarChart3, LayoutDashboard,
+  UserPlus, Sprout, FlaskConical, Wheat, Beaker, BarChart3, LayoutDashboard, Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { getQueue, flushQueue } from "@/lib/api";
+import { getQueue, flushQueue, api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
@@ -18,6 +18,7 @@ export const Route = createFileRoute("/")({
 });
 
 const actions = [
+  { to: "/farmers", label: "View Farmers", icon: Users, hint: "Browse all farmers" },
   { to: "/farmers/new", label: "Add Farmer", icon: UserPlus, hint: "Register a new farmer" },
   { to: "/farms/new", label: "Add Farm", icon: Sprout, hint: "Link a farm to a farmer" },
   { to: "/soil-tests/new", label: "Soil Test", icon: FlaskConical, hint: "pH, NPK, texture" },
@@ -28,9 +29,21 @@ const actions = [
 
 function Dashboard() {
   const [queue, setQueue] = useState(getQueue());
+  const [farmerCount, setFarmerCount] = useState(0);
+
   useEffect(() => {
     const t = setInterval(() => setQueue(getQueue()), 2000);
     return () => clearInterval(t);
+  }, []);
+
+  useEffect(() => {
+    const loadFarmerCount = async () => {
+      const result = await api.getFarmers();
+      if (result.ok) {
+        setFarmerCount(result.data.length);
+      }
+    };
+    loadFarmerCount();
   }, []);
 
   return (
@@ -40,6 +53,13 @@ function Dashboard() {
         title="Field Agent"
         subtitle="Mobile-first capture for the full soil → crop → fertilizer → yield lifecycle."
       />
+
+      <div className="mb-6 grid grid-cols-2 md:grid-cols-4 gap-3">
+        <Link to="/farmers" className="group rounded-xl border border-border bg-card p-4 shadow-sm hover:border-primary hover:shadow-md transition-all">
+          <div className="text-2xl font-display font-semibold text-primary">{farmerCount}</div>
+          <div className="text-xs text-muted-foreground mt-1">Farmers Registered</div>
+        </Link>
+      </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         {actions.map((a) => (

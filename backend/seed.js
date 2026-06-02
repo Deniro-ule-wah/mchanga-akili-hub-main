@@ -30,11 +30,13 @@ function validateRecordExists(item, label) {
 async function createTables() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS farmers (
-      id SERIAL PRIMARY KEY,
-      name TEXT NOT NULL,
+      farmer_id SERIAL PRIMARY KEY,
+      full_name TEXT NOT NULL,
+      phone TEXT NOT NULL,
       email TEXT,
-      phone TEXT,
-      region TEXT,
+      county TEXT,
+      sub_county TEXT,
+      village TEXT,
       created_at TIMESTAMPTZ DEFAULT NOW()
     );
 
@@ -46,7 +48,7 @@ async function createTables() {
       size NUMERIC,
       soil_type TEXT,
       created_at TIMESTAMPTZ DEFAULT NOW(),
-      CONSTRAINT farms_farmer_fk FOREIGN KEY (farmer_id) REFERENCES farmers(id) ON DELETE CASCADE
+      CONSTRAINT farms_farmer_fk FOREIGN KEY (farmer_id) REFERENCES farmers(farmer_id) ON DELETE CASCADE
     );
 
     CREATE TABLE IF NOT EXISTS soil_tests (
@@ -109,7 +111,7 @@ async function createTables() {
 
 async function updateSerialSequences() {
   const sequences = [
-    { table: 'farmers', column: 'id' },
+    { table: 'farmers', column: 'farmer_id' },
     { table: 'farms', column: 'id' },
     { table: 'soil_tests', column: 'id' },
     { table: 'crop_cycles', column: 'id' },
@@ -139,11 +141,11 @@ async function seed() {
   try {
     const farmers = Array.isArray(data.farmers) ? data.farmers : [];
     for (const farmer of farmers) {
-      validateRecordExists(farmer.name, 'Farmer name');
-      const query = `INSERT INTO farmers (id, name, email, phone, region, created_at)
-        VALUES ($1, $2, $3, $4, $5, $6)
-        ON CONFLICT (id) DO NOTHING`; 
-      await pool.query(query, [farmer.id || null, farmer.name, farmer.email || null, farmer.phone || null, farmer.region || null, farmer.created_at || null]);
+      validateRecordExists(farmer.full_name, 'Farmer full_name');
+      const query = `INSERT INTO farmers (farmer_id, full_name, phone, email, county, sub_county, village, created_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        ON CONFLICT (farmer_id) DO NOTHING`; 
+      await pool.query(query, [farmer.farmer_id || null, farmer.full_name, farmer.phone, farmer.email || null, farmer.county || null, farmer.sub_county || null, farmer.village || null, farmer.created_at || null]);
     }
 
     const farms = Array.isArray(data.farms) ? data.farms : [];
