@@ -1,0 +1,37 @@
+services:
+  # PostgreSQL Database
+  - type: pserv
+    name: mchanga-afya-db
+    ipAllowList: []
+    databaseName: agri_intelligence
+    databaseUser: postgres
+    plan: free
+    region: frankfurt
+    # The user will be auto-created. Store the password securely.
+
+  # Express.js Backend API
+  - type: web
+    name: mchanga-afya-backend
+    env: node
+    plan: free
+    region: frankfurt
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    
+    # Connect to the database service
+    envVars:
+      - key: DATABASE_URL
+        scope: run
+        fromDatabase:
+          name: mchanga-afya-db
+          property: connectionString
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: ""  # Render assigns this automatically
+    
+    # Health check (optional but recommended)
+    healthCheckPath: /
+    
+    # Auto-deploy from GitHub
+    autoDeploy: true
