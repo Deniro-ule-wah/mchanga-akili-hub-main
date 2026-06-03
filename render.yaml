@@ -15,8 +15,9 @@ services:
     env: node
     plan: free
     region: frankfurt
-    buildCommand: cd backend && npm install
-    startCommand: cd backend && npm start
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
     
     # Connect to the database service
     envVars:
