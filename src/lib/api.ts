@@ -1,10 +1,11 @@
 // REST API client for Mchanga Afya backend.
-// Configure VITE_API_BASE_URL in your environment to point at your existing PostgreSQL-backed REST API.
+// All network calls go through the centralized apiRequest() from apiclients.ts.
 // Falls back to an offline queue stored in localStorage when the network is unavailable.
 
 import { isAdminAuthenticated } from "@/lib/auth";
+import { apiRequest } from "@/lib/api/apiclients";
 
-const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "") || "";
+const API_CONFIGURED = !!import.meta.env.VITE_API_URL;
 
 export interface GPS {
   latitude: number;
@@ -113,18 +114,16 @@ function enqueue(path: string, method: string, body: unknown) {
 }
 
 export async function flushQueue(): Promise<{ flushed: number; failed: number }> {
-  if (!navigator.onLine || !BASE_URL) return { flushed: 0, failed: 0 };
+  if (!navigator.onLine || !API_CONFIGURED) return { flushed: 0, failed: 0 };
   const q = getQueue();
   const remaining: QueuedRequest[] = [];
   let flushed = 0;
   for (const item of q) {
     try {
-      const res = await fetch(`${BASE_URL}${item.path}`, {
-        method: item.method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(item.body),
+      await apiRequest(item.path, {
+        method: item.method as 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
+        body: item.body,
       });
-      if (!res.ok) throw new Error(String(res.status));
       flushed++;
     } catch {
       remaining.push(item);
@@ -135,17 +134,12 @@ export async function flushQueue(): Promise<{ flushed: number; failed: number }>
 }
 
 async function post<T>(path: string, body: T): Promise<{ ok: true; queued: boolean }> {
-  if (!BASE_URL || !navigator.onLine) {
+  if (!API_CONFIGURED || !navigator.onLine) {
     enqueue(path, "POST", body);
     return { ok: true, queued: true };
   }
   try {
-    const res = await fetch(`${BASE_URL}${path}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    await apiRequest(path, { method: 'POST', body });
     return { ok: true, queued: false };
   } catch {
     enqueue(path, "POST", body);
@@ -156,11 +150,9 @@ async function post<T>(path: string, body: T): Promise<{ ok: true; queued: boole
 export const api = {
   // Farmers
   getFarmers: async () => {
-    if (!BASE_URL) return { ok: false, data: [] };
+    if (!API_CONFIGURED) return { ok: false, data: [] };
     try {
-      const res = await fetch(`${BASE_URL}/farmers`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json = await res.json();
+      const json = await apiRequest<{ data?: unknown[] }>('/api/farmers');
       return { ok: true, data: json.data || [] };
     } catch (error) {
       console.error('getFarmers error:', error);
@@ -169,11 +161,9 @@ export const api = {
   },
 
   getFarms: async () => {
-    if (!BASE_URL) return { ok: false, data: [] };
+    if (!API_CONFIGURED) return { ok: false, data: [] };
     try {
-      const res = await fetch(`${BASE_URL}/farms`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json = await res.json();
+      const json = await apiRequest<{ data?: unknown[] }>('/api/farms');
       return { ok: true, data: json.data || [] };
     } catch (error) {
       console.error('getFarms error:', error);
@@ -182,11 +172,9 @@ export const api = {
   },
 
   getFarmerById: async (id: string | number) => {
-    if (!BASE_URL) return { ok: false, data: null };
+    if (!API_CONFIGURED) return { ok: false, data: null };
     try {
-      const res = await fetch(`${BASE_URL}/farmers/${id}`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json = await res.json();
+      const json = await apiRequest<{ data?: unknown }>(`/api/farmers/${id}`);
       return { ok: true, data: json.data || null };
     } catch (error) {
       console.error('getFarmerById error:', error);
@@ -194,43 +182,34 @@ export const api = {
     }
   },
 
-  createFarmer: (f: Farmer) => post("/farmers", f),
+  createFarmer: (f: Farmer) => post("/api/farmers", f),
 
   updateFarmer: async (id: string | number, updates: Partial<Farmer>) => {
-    if (!BASE_URL || !navigator.onLine) {
-      enqueue(`/farmers/${id}`, "PUT", updates);
+    if (!API_CONFIGURED || !navigator.onLine) {
+      enqueue(`/api/farmers/${id}`, "PUT", updates);
       return { ok: true, queued: true };
     }
     try {
-      const res = await fetch(`${BASE_URL}/farmers/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updates),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      await apiRequest(`/api/farmers/${id}`, { method: 'PUT', body: updates });
       return { ok: true, queued: false };
     } catch (error) {
       console.error('updateFarmer error:', error);
-      enqueue(`/farmers/${id}`, "PUT", updates);
+      enqueue(`/api/farmers/${id}`, "PUT", updates);
       return { ok: true, queued: true };
     }
   },
 
   deleteFarmer: async (id: string | number) => {
-    if (!BASE_URL || !navigator.onLine) {
-      enqueue(`/farmers/${id}`, "DELETE", null);
+    if (!API_CONFIGURED || !navigator.onLine) {
+      enqueue(`/api/farmers/${id}`, "DELETE", null);
       return { ok: true, queued: true };
     }
     try {
-      const res = await fetch(`${BASE_URL}/farmers/${id}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      await apiRequest(`/api/farmers/${id}`, { method: 'DELETE' });
       return { ok: true, queued: false };
     } catch (error) {
       console.error('deleteFarmer error:', error);
-      enqueue(`/farmers/${id}`, "DELETE", null);
+      enqueue(`/api/farmers/${id}`, "DELETE", null);
       return { ok: true, queued: true };
     }
   },
@@ -239,21 +218,19 @@ export const api = {
     if (!isAdminAuthenticated()) {
       return { ok: false, queued: false };
     }
-    if (!BASE_URL || !navigator.onLine) {
-      enqueue(`/farmers/${id}`, "PUT", { status: "confirmed" });
+    if (!API_CONFIGURED || !navigator.onLine) {
+      enqueue(`/api/farmers/${id}`, "PUT", { status: "confirmed" });
       return { ok: true, queued: true };
     }
     try {
-      const res = await fetch(`${BASE_URL}/farmers/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "confirmed" }),
+      await apiRequest(`/api/farmers/${id}`, {
+        method: 'PUT',
+        body: { status: "confirmed" },
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return { ok: true, queued: false };
     } catch (error) {
       console.error('confirmFarmer error:', error);
-      enqueue(`/farmers/${id}`, "PUT", { status: "confirmed" });
+      enqueue(`/api/farmers/${id}`, "PUT", { status: "confirmed" });
       return { ok: true, queued: true };
     }
   },
@@ -262,11 +239,11 @@ export const api = {
     return api.deleteFarmer(id);
   },
 
-  createFarm: (f: Farm) => post("/farms", f),
-  createSoilTest: (s: SoilTest) => post("/soil-tests", s),
-  createCropCycle: (c: CropCycle) => post("/crop-cycles", c),
-  createFertilizerApplication: (a: FertilizerApplication) => post("/fertilizer-applications", a),
-  createYieldOutcome: (y: YieldOutcome) => post("/yield-outcomes", y),
+  createFarm: (f: Farm) => post("/api/farms", f),
+  createSoilTest: (s: SoilTest) => post("/api/soil-tests", s),
+  createCropCycle: (c: CropCycle) => post("/api/crop-cycles", c),
+  createFertilizerApplication: (a: FertilizerApplication) => post("/api/fertilizer-applications", a),
+  createYieldOutcome: (y: YieldOutcome) => post("/api/yield-outcomes", y),
 };
 
 if (typeof window !== "undefined") {
